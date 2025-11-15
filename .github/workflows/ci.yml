@@ -1,0 +1,44 @@
+# .github/workflows/ci.yml
+# Este workflow configura o GitHub Actions para rodar a cada push (commit)
+# e pull request.
+name: CI de Calculadora Simples
+
+# Gatilhos: Roda quando houver push ou pull request para o branch principal
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    # A chave para executar em múltiplos SOs e versões da linguagem é a "strategy/matrix"
+    strategy:
+      matrix:
+        # Requisito 3: Executar nos sistemas operacionais Ubuntu, MacOS e Windows
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # Requisito 4: Executar em pelo menos duas versões do Python
+        python-version: ['3.9', '3.11']
+
+    # Define o ambiente de execução (combinação do SO da matriz)
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout do Código
+      # Ação para baixar o código do seu repositório
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ matrix.python-version }}
+      # Ação para configurar a versão específica do Python (combinação da matriz)
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Exibir Versão do Python e SO
+      # Apenas para debug/verificação visual
+      run: |
+        echo "Rodando testes em ${{ runner.os }} com Python ${{ matrix.python-version }}"
+
+    - name: Executar Testes de Unidade
+      # Comando para rodar todos os testes de unidade usando o módulo unittest
+      run: python -m unittest test_main.py
